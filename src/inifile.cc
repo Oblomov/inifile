@@ -47,7 +47,7 @@ string& trim(string &str)
 
 typedef vector<string> _svec;
 typedef map<string, string> _ssmap;
-typedef map<string, vector<string> > _svmap;
+typedef map<string, _svec > _svmap;
 
 class IniFile::Private
 {
@@ -62,8 +62,16 @@ public:
 
 	string const& get(string const&) const;
 
+	// get avalable sections
+	inline _svec const&
+	get_sections() const
+	{ return _seclist; }
+
 	// get available keys in the given section
-	vector<string> const& get_keys(string const&) const;
+	_svec const& get_keys(string const&) const;
+
+	// get comment for section or key
+	string const& get_comment(string const&) const;
 
 	friend ostream& operator<<(ostream&, IniFile::Private const&);
 };
@@ -178,7 +186,7 @@ IniFile::Private::parse(istream &stream, const char *fname)
 			}
 
 			_seclist.push_back(section);
-			_keylist[section] = vector<string>();
+			_keylist[section] = _svec();
 			_comments[section] = comment;
 
 			comment.clear();
@@ -251,12 +259,22 @@ IniFile::Private::get(string const& key) const
 	return found->second;
 }
 
-vector<string> const&
+_svec const&
 IniFile::Private::get_keys(string const& section) const
 {
 	_svmap::const_iterator found(_keylist.find(section));
 	if (found == _keylist.end())
 		throw notfound_error(section);
+
+	return found->second;
+}
+
+string const&
+IniFile::Private::get_comment(string const& ks) const
+{
+	_ssmap::const_iterator found(_comments.find(ks));
+	if (found == _comments.end())
+		throw notfound_error(ks);
 
 	return found->second;
 }
@@ -376,6 +394,14 @@ IniFile::get(string const&, double) const;
 template float
 IniFile::get(string const&, float) const;
 
-vector<string> const&
+_svec const&
+IniFile::get_sections() const
+{ return _private->get_sections(); }
+
+_svec const&
 IniFile::get_keys(string const& section) const
 { return _private->get_keys(section); }
+
+string const&
+IniFile::get_comment(string const& ks) const
+{ return _private->get_comment(ks); }

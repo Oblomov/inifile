@@ -59,9 +59,17 @@ public:
 	std::string const&
 	get(std::string const& key) const;
 
+	// get available sections
+	std::vector<std::string> const&
+	get_sections() const;
+
 	// get available keys in the given section
 	std::vector<std::string> const&
 	get_keys(std::string const&) const;
+
+	// get comment for section or key
+	std::string const&
+	get_comment(std::string const&) const;
 
 	friend std::ostream& operator<<(std::ostream&, IniFile const&);
 };
