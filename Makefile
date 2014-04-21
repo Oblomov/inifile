@@ -2,10 +2,11 @@ SRCDIR=src
 INCDIR=include
 OBJDIR=build
 LIBNAME=inifile
+ERRNAME=inierr
 
 CPPFLAGS=-g -Wall -I$(INCDIR)
 
-OBJS=$(addprefix $(OBJDIR)/, $(LIBNAME).o notfound.o)
+OBJS=$(addprefix $(OBJDIR)/, $(LIBNAME).o $(ERRNAME).o)
 
 OUTLIB=lib$(LIBNAME).a
 SAMPLE=sample
@@ -21,8 +22,8 @@ $(OBJDIR):
 $(OBJDIR)/%.o: %.cc %.h
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
-# they all depend from notfound.h
-$(OBJS): notfound.h | $(OBJDIR)
+# they all depend from inierr.h
+$(OBJS): $(ERRNAME).h | $(OBJDIR)
 
 $(OUTLIB): $(OBJS)
 	$(AR) cr $@ $^

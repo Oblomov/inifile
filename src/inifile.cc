@@ -1,5 +1,5 @@
 #include "inifile.h"
-#include "notfound.h"
+#include "inierr.h"
 
 #include <vector>
 
@@ -68,10 +68,8 @@ IniFile::Private::parse(istream &stream, const char *fname)
 	int lnum = 0;
 	stringstream errmsg;
 
-#define ERR(stuff) do { \
-		errmsg << fname << ":" << lnum << ": " << stuff; \
-		throw runtime_error(errmsg.str()); \
-	} while (0)
+#define ERR(stuff) \
+	throw parse_error(fname, lnum, stuff);
 
 	while (getline(stream, line)) {
 		++lnum;
@@ -132,8 +130,9 @@ IniFile::Private::parse(istream &stream, const char *fname)
 		rtrim(key);
 		ltrim(val); // no need to rtrim
 
-		if (_data.find(key) != _data.end())
-			ERR("duplicate key " << key << " (previously defined as " << _data.find(key)->second << ")");
+		_data_type::const_iterator found(_data.find(key));
+		if (found != _data.end())
+			ERR("duplicate key " + key + " (previously defined as " + found->second + ")");
 		_data[key] = val;
 	}
 }

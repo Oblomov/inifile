@@ -1,5 +1,5 @@
 #include "inifile.h"
-#include "notfound.h"
+#include "inierr.h"
 
 #include <sstream>
 #include <iostream>
