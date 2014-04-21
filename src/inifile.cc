@@ -50,9 +50,18 @@ string& ltrim(string &str)
 	return str;
 }
 
+// trim whitespace on both sides
+static inline
+string& trim(string &str)
+{ return ltrim(rtrim(str)); }
+
 class IniFile::Private
 {
-	typedef std::map<std::string, std::string> _data_type;
+	// a datum is a comment (string) followed by a (content) string
+	typedef pair<string, string> _datum;
+	typedef map<string, _datum> _data_type;
+
+	vector<_datum> _seclist; // list of sections
 	_data_type _data;
 public:
 	void parse(istream &stream, const char *fname);
@@ -65,6 +74,7 @@ IniFile::Private::parse(istream &stream, const char *fname)
 {
 	string line;
 	string section;
+	string comment;
 	int lnum = 0;
 	stringstream errmsg;
 
@@ -74,18 +84,17 @@ IniFile::Private::parse(istream &stream, const char *fname)
 	while (getline(stream, line)) {
 		++lnum;
 
-		// skip empty lines
-		if (line.empty())
-			continue;
+		// trim whitespace
+		trim(line);
 
-		// trim EOL whitespace
-		rtrim(line);
-
-		// skip comment lines
-		// TODO if we want to be able to save, we want to preserve
-		// comments somehow
-		if (line[0] == '#' || line[0] == ';')
+		// skip empty lines/comment lines. we need to check for the first
+		// chracter being a null byte too because apparently the
+		// operations in getline() and trim() don't actually mark the string as empty
+		// even when it's an empty string. odd.
+		if (line.empty() || line[0] == '\0' || line[0] == '#' || line[0] == ';') {
+			comment += line + "\n";
 			continue;
+		}
 
 		// check section begin
 		if (line[0] == '[') {
@@ -110,6 +119,10 @@ IniFile::Private::parse(istream &stream, const char *fname)
 				section += ".";
 				section += rest;
 			}
+
+			_seclist.push_back(make_pair(comment, section));
+			comment.clear();
+
 			continue;
 		}
 
@@ -126,14 +139,13 @@ IniFile::Private::parse(istream &stream, const char *fname)
 		string val = line.substr(eqpos+1, string::npos);
 
 		// trim key and value
-		ltrim(key);
-		rtrim(key);
+		rtrim(key); // no need to ltrim
 		ltrim(val); // no need to rtrim
 
 		_data_type::const_iterator found(_data.find(key));
 		if (found != _data.end())
-			ERR("duplicate key " + key + " (previously defined as " + found->second + ")");
-		_data[key] = val;
+			ERR("duplicate key " + key + " (previously defined as " + found->second.second + ")");
+		_data[key] = make_pair(comment, val);
 	}
 }
 
@@ -172,7 +184,7 @@ IniFile::Private::get(string const& key)
 	if (found == _data.end())
 		throw notfound_error(key);
 
-	return found->second;
+	return found->second.second;
 }
 
 /* IniFile proper */

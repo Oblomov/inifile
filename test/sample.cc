@@ -40,6 +40,8 @@ int main(int argc, char *argv[])
 #define TEST_PARSE_OK(text) \
 	EXPECT_SUCCESS(ini = IniFile::parse(text))
 
+	TEST_PARSE_OK(""); // empty string
+	TEST_PARSE_OK("\n"); // empty line
 	TEST_PARSE_FAIL(" just a comment\n[section]\nkey=value");
 	TEST_PARSE_FAIL("# just a comment\n[section\nkey=value");
 	TEST_PARSE_FAIL("# just a comment\n[section \"]\nkey=value");
