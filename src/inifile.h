@@ -8,10 +8,16 @@
 
 class IniFile
 {
-	typedef std::map<std::string, std::string> _data_type;
-	_data_type _data;
+	class Private;
+	Private *_private;
 
 public:
+	IniFile();
+	~IniFile();
+
+	IniFile(IniFile const&);
+	IniFile& operator=(IniFile const&);
+
 	// parse an input stream, optionally associate
 	// a filename to it (to improve error messages)
 	static IniFile

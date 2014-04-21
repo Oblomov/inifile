@@ -50,26 +50,22 @@ string& ltrim(string &str)
 	return str;
 }
 
-
-IniFile
-IniFile::load(const char *fname)
+class IniFile::Private
 {
-	ifstream inifile(fname);
-	if (!inifile)
-		throw notfound_error(fname);
-	return parse(inifile, fname);
+	typedef std::map<std::string, std::string> _data_type;
+	_data_type _data;
+public:
+	void parse(istream &stream, const char *fname);
 
-}
+	string const& get(string const&);
+};
 
-IniFile
-IniFile::parse(std::istream &inifile, const char *_fname)
+void
+IniFile::Private::parse(istream &stream, const char *fname)
 {
 	string line;
 	string section;
 	int lnum = 0;
-	const char *fname = _fname ? _fname : "<>";
-
-	IniFile ret;
 	stringstream errmsg;
 
 #define ERR(stuff) do { \
@@ -77,7 +73,7 @@ IniFile::parse(std::istream &inifile, const char *_fname)
 		throw runtime_error(errmsg.str()); \
 	} while (0)
 
-	while (getline(inifile, line)) {
+	while (getline(stream, line)) {
 		++lnum;
 
 		// skip empty lines
@@ -136,11 +132,10 @@ IniFile::parse(std::istream &inifile, const char *_fname)
 		rtrim(key);
 		ltrim(val); // no need to rtrim
 
-		if (ret._data.find(key) != ret._data.end())
-			ERR("duplicate key " << key << " (previously defined as " << ret._data.find(key)->second << ")");
-		ret._data[key] = val;
+		if (_data.find(key) != _data.end())
+			ERR("duplicate key " << key << " (previously defined as " << _data.find(key)->second << ")");
+		_data[key] = val;
 	}
-	return ret;
 }
 
 // provide a fallback key, obtained replacing the text
@@ -166,7 +161,7 @@ fallback_key(string const& key)
 }
 
 string const&
-IniFile::get(string const& key)
+IniFile::Private::get(string const& key)
 {
 	_data_type::const_iterator found(_data.find(key));
 	if (found == _data.end()) {
@@ -179,6 +174,53 @@ IniFile::get(string const& key)
 		throw notfound_error(key);
 
 	return found->second;
+}
+
+/* IniFile proper */
+
+IniFile::IniFile() : _private(new IniFile::Private())
+{}
+
+IniFile::~IniFile()
+{ delete _private;}
+
+IniFile::IniFile(IniFile const& o) :
+	_private(new IniFile::Private(*(o._private)))
+{}
+
+IniFile&
+IniFile::operator=(IniFile const& o)
+{
+	delete _private;
+	_private = new IniFile::Private(*(o._private));
+	return *this;
+}
+
+IniFile
+IniFile::load(const char *fname)
+{
+	ifstream inifile(fname);
+	if (!inifile)
+		throw notfound_error(fname);
+	return parse(inifile, fname);
+
+}
+
+IniFile
+IniFile::parse(istream &inifile, const char *_fname)
+{
+	const char *fname = _fname ? _fname : "<>";
+
+	IniFile ret;
+	ret._private->parse(inifile, fname);
+
+	return ret;
+}
+
+string const&
+IniFile::get(string const& key)
+{
+	return _private->get(key);
 }
 
 string const&
