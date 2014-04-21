@@ -124,14 +124,6 @@ operator<<(ostream& out, IniFile::Private const& ip)
 	return out;
 }
 
-ostream&
-operator<<(ostream& out, IniFile const& ini)
-{
-	out << *(ini._private);
-	return out;
-}
-
-
 void
 IniFile::Private::parse(istream &stream, const char *fname)
 {
@@ -400,3 +392,17 @@ IniFile::get_keys(string const& section) const
 string const&
 IniFile::get_comment(string const& ks) const
 { return _private->get_comment(ks); }
+
+ostream&
+operator<<(ostream& out, IniFile const& ini)
+{
+	out << *(ini._private);
+	return out;
+}
+
+istream&
+operator>>(istream& in, IniFile &ini)
+{
+	ini = IniFile::parse(in);
+	return in;
+}

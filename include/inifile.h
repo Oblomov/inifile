@@ -72,6 +72,7 @@ public:
 	get_comment(std::string const&) const;
 
 	friend std::ostream& operator<<(std::ostream&, IniFile const&);
+	friend std::istream& operator>>(std::istream&, IniFile &);
 };
 
 /// dotjoin: joins two or three strings with dots
