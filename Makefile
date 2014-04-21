@@ -4,32 +4,26 @@ LIBNAME=inifile
 
 CPPFLAGS=-g -Wall -I$(SRCDIR)
 
-OBJS=$(LIBNAME).o notfound.o
+OBJS=$(addprefix $(OBJDIR)/, $(LIBNAME).o notfound.o)
 
 OUTLIB=lib$(LIBNAME).a
 SAMPLE=sample
 
 all: $(OUTLIB)
 
-vpath %.cc src/ test/
-vpath %.h src/
-vpath %.o $(OBJDIR)
+vpath %.cc $(SRCDIR) test/
+vpath %.h $(SRCDIR)
 
 $(OBJDIR):
 	mkdir -p $@
 
-$(OBJDIR)/%.o: %.cc | $(OBJDIR)
+$(OBJDIR)/%.o: %.cc %.h
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
-# each object file depends from the corresponding .h
-$(OBJDIR)/%.o: %.h
-
 # they all depend from notfound.h
-$(OBJDIR)/%.o: notfound.h
+$(OBJS): notfound.h | $(OBJDIR)
 
-$(OBJDIR)/$(SAMPLE).o: $(LIBNAME).h
-
-$(OUTLIB): $(addprefix $(OBJDIR)/, $(OBJS))
+$(OUTLIB): $(OBJS)
 	$(AR) cr $@ $^
 
 $(SAMPLE): LDLIBS=-L. -lstdc++ -l$(LIBNAME)
