@@ -41,18 +41,18 @@ public:
 
 	// if key not found, return missing
 	template<typename T> T
-	get(std::string const& key, T missing);
+	get(std::string const& key, T missing) const;
 	// if key not found, throw
 	template<typename T> T
-	get(std::string const& key);
+	get(std::string const& key) const;
 
 	// if key not found, return missing
 	std::string const&
-	get(std::string const& key, std::string const& missing);
+	get(std::string const& key, std::string const& missing) const;
 
 	// if key not found, throw
 	std::string const&
-	get(std::string const& key);
+	get(std::string const& key) const;
 };
 
 /// dotjoin: joins two or three strings with dots

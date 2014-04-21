@@ -54,7 +54,7 @@ class IniFile::Private
 public:
 	void parse(istream &stream, const char *fname);
 
-	string const& get(string const&);
+	string const& get(string const&) const;
 };
 
 void
@@ -157,7 +157,7 @@ fallback_key(string const& key)
 }
 
 string const&
-IniFile::Private::get(string const& key)
+IniFile::Private::get(string const& key) const
 {
 	_data_type::const_iterator found(_data.find(key));
 	if (found == _data.end()) {
@@ -214,13 +214,13 @@ IniFile::parse(istream &inifile, const char *_fname)
 }
 
 string const&
-IniFile::get(string const& key)
+IniFile::get(string const& key) const
 {
 	return _private->get(key);
 }
 
 string const&
-IniFile::get(string const& key, string const& missing)
+IniFile::get(string const& key, string const& missing) const
 {
 	try {
 		return this->get(key);
@@ -239,7 +239,7 @@ static const char* falsies[] = {
 
 template<>
 bool
-IniFile::get<bool>(string const& key)
+IniFile::get<bool>(string const& key) const
 {
 	const char* val(this->get(key).c_str());
 
@@ -260,7 +260,7 @@ IniFile::get<bool>(string const& key)
 }
 
 template<typename T> T
-IniFile::get(std::string const& key)
+IniFile::get(std::string const& key) const
 {
 	T val;
 
@@ -270,7 +270,7 @@ IniFile::get(std::string const& key)
 }
 
 template<typename T> T
-IniFile::get(string const& key, T missing)
+IniFile::get(string const& key, T missing) const
 {
 	try {
 		return this->get<T>(key);
@@ -280,10 +280,10 @@ IniFile::get(string const& key, T missing)
 }
 
 template bool
-IniFile::get(string const&, bool);
+IniFile::get(string const&, bool) const;
 
 template double
-IniFile::get(string const&, double);
+IniFile::get(string const&, double) const;
 
 template float
-IniFile::get(string const&, float);
+IniFile::get(string const&, float) const;
