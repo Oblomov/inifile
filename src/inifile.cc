@@ -10,6 +10,8 @@
 #include <cstring>
 #include <stdexcept>
 
+#include <cassert>
+
 using namespace std;
 
 static const char whitespace[] = " \n\t\v";
@@ -43,16 +45,17 @@ static inline
 string& trim(string &str)
 { return ltrim(rtrim(str)); }
 
-// a datum is a comment (string) followed by a (content) string
-typedef pair<string, string> _datum;
-typedef map<string, _datum> _data_type;
+typedef vector<string> _svec;
+typedef map<string, string> _ssmap;
+typedef map<string, vector<string> > _svmap;
 
 class IniFile::Private
 {
 private:
-	vector<_datum> _seclist; // list of sections
-	map<string, vector<string> > _keylist; // list of keys per section
-	_data_type _data;
+	_svec _seclist; // list of sections
+	_svmap _keylist; // list of keys per section
+	_ssmap _data; // maps section.key to value
+	_ssmap _comments; // map section and section.key to comments
 
 public:
 	void parse(istream &stream, const char *fname);
@@ -66,18 +69,11 @@ public:
 };
 
 static ostream&
-stream_key(ostream &stream, string const& key, _datum const& datum)
+stream_secname(ostream &stream, string const& secname)
 {
-	return stream << datum.first << key << " = " << datum.second;
-}
-
-static ostream&
-stream_secname(ostream &stream, _datum const& datum)
-{
-	string secname(datum.second);
 	size_t dotpos = secname.find('.');
 
-	stream << datum.first << "[" << secname.substr(0, dotpos);
+	stream << "[" << secname.substr(0, dotpos);
 	if (dotpos != string::npos)
 		stream << " \"" << secname.substr(dotpos+1, string::npos) << "\"";
 	return stream << "]";
@@ -86,23 +82,41 @@ stream_secname(ostream &stream, _datum const& datum)
 ostream&
 operator<<(ostream& out, IniFile::Private const& ip)
 {
-	vector<_datum>::const_iterator fs = ip._seclist.begin();
-	vector<_datum>::const_iterator ls = ip._seclist.end();
+	_svec::const_iterator fs = ip._seclist.begin();
+	_svec::const_iterator ls = ip._seclist.end();
 
-	for (; fs != ls; ++fs) {
-		// section name
+	// for each section
+	while (fs != ls) {
+		// output comment
+		_ssmap::const_iterator comment(ip._comments.find(*fs));
+		assert(comment != ip._comments.end());
+		out << comment->second;
+
+		// output section name
 		stream_secname(out, *fs) << endl;
 
-		const string prefix(fs->second + ".");
-		vector<string> const& keys(ip._keylist.find(fs->second)->second);
+		const string prefix(*fs + ".");
 
-		vector<string>::const_iterator fk = keys.begin();
-		vector<string>::const_iterator lk = keys.end();
+		_svec const& keys(ip.get_keys(*fs));
+
+		// for each key
+		_svec::const_iterator fk = keys.begin();
+		_svec::const_iterator lk = keys.end();
 		while (fk != lk) {
-			_datum const& dat(ip._data.find(prefix+*fk)->second);
-			stream_key(out, *fk, dat) << endl;
+			// section.key
+			const string key(prefix + *fk);
+
+			// output comment
+			comment = ip._comments.find(key);
+			assert(comment != ip._comments.end());
+			out << comment->second;
+
+			// output key = value
+			out << *fk << " = " << ip._data.find(key)->second << endl;
 			++fk;
 		}
+
+		++fs;
 	}
 	return out;
 }
@@ -163,8 +177,10 @@ IniFile::Private::parse(istream &stream, const char *fname)
 				section += rest;
 			}
 
-			_seclist.push_back(make_pair(comment, section));
+			_seclist.push_back(section);
 			_keylist[section] = vector<string>();
+			_comments[section] = comment;
+
 			comment.clear();
 
 			continue;
@@ -186,11 +202,14 @@ IniFile::Private::parse(istream &stream, const char *fname)
 		string val = line.substr(eqpos+1, string::npos);
 		ltrim(val); // no need to rtrim
 
-		_data_type::const_iterator found(_data.find(key));
+		_ssmap::const_iterator found(_data.find(key));
 		if (found != _data.end())
-			ERR("duplicate key " + key + " (previously defined as " + found->second.second + ")");
-		_data[key] = make_pair(comment, val);
+			ERR("duplicate key " + key + " (previously defined as " + found->second + ")");
+
 		_keylist[section].push_back(skey);
+		_data[key] = val;
+		_comments[key] = comment;
+		comment.clear();
 	}
 }
 
@@ -219,7 +238,7 @@ fallback_key(string const& key)
 string const&
 IniFile::Private::get(string const& key) const
 {
-	_data_type::const_iterator found(_data.find(key));
+	_ssmap::const_iterator found(_data.find(key));
 	if (found == _data.end()) {
 		// not found, look for fallbacks
 		string fallback(fallback_key(key));
@@ -229,14 +248,13 @@ IniFile::Private::get(string const& key) const
 	if (found == _data.end())
 		throw notfound_error(key);
 
-	return found->second.second;
+	return found->second;
 }
 
 vector<string> const&
 IniFile::Private::get_keys(string const& section) const
 {
-	map<string, vector<string> >::const_iterator
-		found(_keylist.find(section));
+	_svmap::const_iterator found(_keylist.find(section));
 	if (found == _keylist.end())
 		throw notfound_error(section);
 
