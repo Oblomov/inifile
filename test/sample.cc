@@ -42,12 +42,13 @@ int main(int argc, char *argv[])
 
 	TEST_PARSE_OK(""); // empty string
 	TEST_PARSE_OK("\n"); // empty line
+	TEST_PARSE_OK(" \n"); // empty line
 	TEST_PARSE_FAIL(" just a comment\n[section]\nkey=value");
 	TEST_PARSE_FAIL("# just a comment\n[section\nkey=value");
 	TEST_PARSE_FAIL("# just a comment\n[section \"]\nkey=value");
 	TEST_PARSE_FAIL("# just a comment\n[section \"open]\nkey=value");
 	TEST_PARSE_FAIL("# just a comment\n[section]\nkey value");
-	TEST_PARSE_OK("# just a comment\n[section]\nkey=value\n[override *]\nkey=valuestar\n[override spec]\nkeyspec=valuespec");
+	TEST_PARSE_OK("# just a comment\n[section]\nkey=value\n\n[override *]\nkey=valuestar\n[override spec]\nkeyspec=valuespec");
 
 #define TEST_VALUE_FAIL(key) \
 	EXPECT_FAILURE(ini.get(key), notfound_error)

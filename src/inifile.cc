@@ -12,23 +12,17 @@
 
 using namespace std;
 
+static const char whitespace[] = " \n\t\v";
+
 // trim whitespace at the end of a string
 static inline
 string& rtrim(string &str)
 {
-	// iterate from the end of the string to find
-	// the first non-space character
-	string::iterator end = str.end();
-	string::iterator start = str.begin();
-	string::iterator it(end);
-
-	// empty body, just stepping it backwards while it points to whitespace
-	while (it != start && isspace(*(--it)));
-
-	// note the ++it, becase it is currently pointing
-	// at the last nonspace character
-	if (++it != end)
-		str.erase(it, end);
+	size_t nws = str.find_last_not_of(whitespace);
+	if (nws == string::npos)
+		str.clear();
+	else
+		str.erase(++nws, string::npos);
 	return str;
 }
 
@@ -36,17 +30,11 @@ string& rtrim(string &str)
 static inline
 string& ltrim(string &str)
 {
-	// iterate from the beginning of the string to find
-	// the first non-space character
-	string::iterator end = str.end();
-	string::iterator start = str.begin();
-	string::iterator it(start);
-
-	// empty body, just stepping forward while it points to whitespace
-	while (it != end && isspace(*(it++)))
-
-	if (it != start)
-		str.erase(start, it);
+	size_t nws = str.find_first_not_of(whitespace);
+	if (nws == string::npos)
+		str.clear();
+	else
+		str.erase(0, nws);
 	return str;
 }
 
@@ -87,11 +75,8 @@ IniFile::Private::parse(istream &stream, const char *fname)
 		// trim whitespace
 		trim(line);
 
-		// skip empty lines/comment lines. we need to check for the first
-		// chracter being a null byte too because apparently the
-		// operations in getline() and trim() don't actually mark the string as empty
-		// even when it's an empty string. odd.
-		if (line.empty() || line[0] == '\0' || line[0] == '#' || line[0] == ';') {
+		// skip empty lines/comment lines.
+		if (line.empty() || line[0] == '#' || line[0] == ';') {
 			comment += line + "\n";
 			continue;
 		}
