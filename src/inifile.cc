@@ -249,8 +249,7 @@ IniFile::IniFile(IniFile const& o) :
 IniFile&
 IniFile::operator=(IniFile const& o)
 {
-	delete _private;
-	_private = new IniFile::Private(*(o._private));
+	*_private = *o._private;
 	return *this;
 }
 
