@@ -51,6 +51,7 @@ class IniFile::Private
 {
 private:
 	vector<_datum> _seclist; // list of sections
+	map<string, vector<string> > _keylist; // list of keys per section
 	_data_type _data;
 
 public:
@@ -90,21 +91,13 @@ operator<<(ostream& out, IniFile::Private const& ip)
 		stream_secname(out, *fs) << endl;
 
 		const string prefix(fs->second + ".");
-		size_t plen = prefix.size();
+		vector<string> const& keys(ip._keylist.find(fs->second)->second);
 
-		// we rely on the fact that keys are stored in ascending order,
-		// so all section keys are between the first matching (inclusing)
-		// and first subsequent non-matching (exclusive) keys
-		_data_type::const_iterator fk = ip._data.begin();
-		_data_type::const_iterator lk = ip._data.end();
-
-		// skip until the first matching key
-		while (fk != lk && fk->first.compare(0, plen, prefix))
-			++fk;
-
-		// print until the first non-matching key
-		while (fk != lk && fk->first.compare(0, plen, prefix) == 0) {
-			stream_key(out, fk->first.substr(plen, string::npos), fk->second) << endl;
+		vector<string>::const_iterator fk = keys.begin();
+		vector<string>::const_iterator lk = keys.end();
+		while (fk != lk) {
+			_datum const& dat(ip._data.find(prefix+*fk)->second);
+			stream_key(out, *fk, dat) << endl;
 			++fk;
 		}
 	}
@@ -168,6 +161,7 @@ IniFile::Private::parse(istream &stream, const char *fname)
 			}
 
 			_seclist.push_back(make_pair(comment, section));
+			_keylist[section] = vector<string>();
 			comment.clear();
 
 			continue;
@@ -182,17 +176,18 @@ IniFile::Private::parse(istream &stream, const char *fname)
 		if (eqpos == string::npos)
 			ERR("missing = sign");
 
-		string key = dotjoin(section, line.substr(0, eqpos));
-		string val = line.substr(eqpos+1, string::npos);
+		string skey = line.substr(0, eqpos);
+		rtrim(skey); // no need to ltrim
 
-		// trim key and value
-		rtrim(key); // no need to ltrim
+		string key = dotjoin(section, skey);
+		string val = line.substr(eqpos+1, string::npos);
 		ltrim(val); // no need to rtrim
 
 		_data_type::const_iterator found(_data.find(key));
 		if (found != _data.end())
 			ERR("duplicate key " + key + " (previously defined as " + found->second.second + ")");
 		_data[key] = make_pair(comment, val);
+		_keylist[section].push_back(skey);
 	}
 }
 
