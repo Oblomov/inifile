@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
 	TEST_VALUE_IS("section.key", "value");
 	TEST_VALUE_IS("override.spec.key", "valuestar");
 	TEST_VALUE_IS("override.spec.keyspec", "valuespec");
+	EXPECT_SUCCESS(ini.get_keys("section").front() == "key");
 
 	cout << ini << endl;
 

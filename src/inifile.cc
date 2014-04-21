@@ -59,6 +59,9 @@ public:
 
 	string const& get(string const&) const;
 
+	// get available keys in the given section
+	vector<string> const& get_keys(string const&) const;
+
 	friend ostream& operator<<(ostream&, IniFile::Private const&);
 };
 
@@ -229,6 +232,17 @@ IniFile::Private::get(string const& key) const
 	return found->second.second;
 }
 
+vector<string> const&
+IniFile::Private::get_keys(string const& section) const
+{
+	map<string, vector<string> >::const_iterator
+		found(_keylist.find(section));
+	if (found == _keylist.end())
+		throw notfound_error(section);
+
+	return found->second;
+}
+
 /* IniFile proper */
 
 IniFile::IniFile() : _private(new IniFile::Private())
@@ -343,3 +357,7 @@ IniFile::get(string const&, double) const;
 
 template float
 IniFile::get(string const&, float) const;
+
+vector<string> const&
+IniFile::get_keys(string const& section) const
+{ return _private->get_keys(section); }

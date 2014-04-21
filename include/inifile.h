@@ -6,6 +6,7 @@
 #include <ostream>
 #include <sstream>
 #include <map>
+#include <vector>
 
 class IniFile
 {
@@ -57,6 +58,10 @@ public:
 	// if key not found, throw
 	std::string const&
 	get(std::string const& key) const;
+
+	// get available keys in the given section
+	std::vector<std::string> const&
+	get_keys(std::string const&) const;
 
 	friend std::ostream& operator<<(std::ostream&, IniFile const&);
 };
