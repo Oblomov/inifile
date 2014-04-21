@@ -52,9 +52,10 @@ int main(int argc, char *argv[])
 
 #define TEST_VALUE_FAIL(key) \
 	EXPECT_FAILURE(ini.get(key), notfound_error)
-#define TEST_VALUE_IS(key, expected) \
+
+#define TEST_RETURNS(action, expected) \
 	EXPECT_SUCCESS( \
-		string got = ini.get(key); \
+		string got = action; \
 		if (got != expected) { \
 			stringstream error; \
 			error << "expected " << expected ", got " << got; \
@@ -62,15 +63,24 @@ int main(int argc, char *argv[])
 		} \
 		)
 
+#define TEST_VALUE_IS(key, expected) \
+	TEST_RETURNS(ini.get(key), expected)
+
 	TEST_VALUE_FAIL("section");
 	TEST_VALUE_IS("section.key", "value");
 	TEST_VALUE_IS("override.spec.key", "valuestar");
 	TEST_VALUE_IS("override.spec.keyspec", "valuespec");
-	EXPECT_SUCCESS(ini.get_keys("section").front() == "key");
+
+	TEST_RETURNS(ini.get_keys("section").front(), "key");
 
 	cout << ini << endl;
 
 	EXPECT_FAILURE(ini = IniFile::load("this file doesn't exist"), notfound_error);
+
+	stringstream sometext;
+	sometext << "[section]\n; comment\nkey = value";
+	EXPECT_SUCCESS(sometext >> ini);
+	TEST_RETURNS(ini.get_comment("section.key"), "; comment\n");
 
 	if (argc > 1) {
 		ini = IniFile::load(argv[1]);
