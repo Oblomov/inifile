@@ -1,8 +1,9 @@
 SRCDIR=src
+INCDIR=include
 OBJDIR=build
 LIBNAME=inifile
 
-CPPFLAGS=-g -Wall -I$(SRCDIR)
+CPPFLAGS=-g -Wall -I$(INCDIR)
 
 OBJS=$(addprefix $(OBJDIR)/, $(LIBNAME).o notfound.o)
 
@@ -12,7 +13,7 @@ SAMPLE=sample
 all: $(OUTLIB)
 
 vpath %.cc $(SRCDIR) test/
-vpath %.h $(SRCDIR)
+vpath %.h $(INCDIR)
 
 $(OBJDIR):
 	mkdir -p $@
