@@ -72,8 +72,6 @@ public:
 
 	// get comment for section or key
 	string const& get_comment(string const&) const;
-
-	friend ostream& operator<<(ostream&, IniFile::Private const&);
 };
 
 static ostream&
@@ -90,15 +88,14 @@ stream_secname(ostream &stream, string const& secname)
 ostream&
 operator<<(ostream& out, IniFile::Private const& ip)
 {
-	_svec::const_iterator fs = ip._seclist.begin();
-	_svec::const_iterator ls = ip._seclist.end();
+	_svec const& secs = ip.get_sections();
+	_svec::const_iterator fs = secs.begin();
+	_svec::const_iterator ls = secs.end();
 
 	// for each section
 	while (fs != ls) {
 		// output comment
-		_ssmap::const_iterator comment(ip._comments.find(*fs));
-		assert(comment != ip._comments.end());
-		out << comment->second;
+		out << ip.get_comment(*fs);
 
 		// output section name
 		stream_secname(out, *fs) << endl;
@@ -115,12 +112,10 @@ operator<<(ostream& out, IniFile::Private const& ip)
 			const string key(prefix + *fk);
 
 			// output comment
-			comment = ip._comments.find(key);
-			assert(comment != ip._comments.end());
-			out << comment->second;
+			out << ip.get_comment(key);
 
 			// output key = value
-			out << *fk << " = " << ip._data.find(key)->second << endl;
+			out << *fk << " = " << ip.get(key) << endl;
 			++fk;
 		}
 
