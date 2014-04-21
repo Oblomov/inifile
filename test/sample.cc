@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
 	TEST_VALUE_IS("override.spec.key", "valuestar");
 	TEST_VALUE_IS("override.spec.keyspec", "valuespec");
 
+	cout << ini << endl;
 
 	EXPECT_FAILURE(ini = IniFile::load("this file doesn't exist"), notfound_error);
 
@@ -78,5 +79,7 @@ int main(int argc, char *argv[])
 		bool engy = ini.get<bool>(dotjoin("writer", writer, "energy"));
 		cout << norms << " " << engy << endl;
 		cout << ini.get<double>("problem.slope") << endl;
+
+		cout << ini << endl;
 	}
 }

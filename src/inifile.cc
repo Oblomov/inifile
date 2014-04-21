@@ -43,19 +43,81 @@ static inline
 string& trim(string &str)
 { return ltrim(rtrim(str)); }
 
+// a datum is a comment (string) followed by a (content) string
+typedef pair<string, string> _datum;
+typedef map<string, _datum> _data_type;
+
 class IniFile::Private
 {
-	// a datum is a comment (string) followed by a (content) string
-	typedef pair<string, string> _datum;
-	typedef map<string, _datum> _data_type;
-
+private:
 	vector<_datum> _seclist; // list of sections
 	_data_type _data;
+
 public:
 	void parse(istream &stream, const char *fname);
 
 	string const& get(string const&) const;
+
+	friend ostream& operator<<(ostream&, IniFile::Private const&);
 };
+
+static ostream&
+stream_key(ostream &stream, string const& key, _datum const& datum)
+{
+	return stream << datum.first << key << " = " << datum.second;
+}
+
+static ostream&
+stream_secname(ostream &stream, _datum const& datum)
+{
+	string secname(datum.second);
+	size_t dotpos = secname.find('.');
+
+	stream << datum.first << "[" << secname.substr(0, dotpos);
+	if (dotpos != string::npos)
+		stream << " \"" << secname.substr(dotpos+1, string::npos) << "\"";
+	return stream << "]";
+}
+
+ostream&
+operator<<(ostream& out, IniFile::Private const& ip)
+{
+	vector<_datum>::const_iterator fs = ip._seclist.begin();
+	vector<_datum>::const_iterator ls = ip._seclist.end();
+
+	for (; fs != ls; ++fs) {
+		// section name
+		stream_secname(out, *fs) << endl;
+
+		const string prefix(fs->second + ".");
+		size_t plen = prefix.size();
+
+		// we rely on the fact that keys are stored in ascending order,
+		// so all section keys are between the first matching (inclusing)
+		// and first subsequent non-matching (exclusive) keys
+		_data_type::const_iterator fk = ip._data.begin();
+		_data_type::const_iterator lk = ip._data.end();
+
+		// skip until the first matching key
+		while (fk != lk && fk->first.compare(0, plen, prefix))
+			++fk;
+
+		// print until the first non-matching key
+		while (fk != lk && fk->first.compare(0, plen, prefix) == 0) {
+			stream_key(out, fk->first.substr(plen, string::npos), fk->second) << endl;
+			++fk;
+		}
+	}
+	return out;
+}
+
+ostream&
+operator<<(ostream& out, IniFile const& ini)
+{
+	out << *(ini._private);
+	return out;
+}
+
 
 void
 IniFile::Private::parse(istream &stream, const char *fname)

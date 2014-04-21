@@ -3,12 +3,16 @@
 
 #include <string>
 #include <istream>
+#include <ostream>
 #include <sstream>
 #include <map>
 
 class IniFile
 {
+public:
 	class Private;
+
+private:
 	Private *_private;
 
 public:
@@ -53,6 +57,8 @@ public:
 	// if key not found, throw
 	std::string const&
 	get(std::string const& key) const;
+
+	friend std::ostream& operator<<(std::ostream&, IniFile const&);
 };
 
 /// dotjoin: joins two or three strings with dots
