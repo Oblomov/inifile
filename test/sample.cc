@@ -82,6 +82,10 @@ int main(int argc, char *argv[])
 	EXPECT_SUCCESS(sometext >> ini);
 	TEST_RETURNS(ini.get_comment("section.key"), "; comment\n");
 
+	EXPECT_FAILURE(ini.add_section("section", "comment"), duplicate_error);
+	EXPECT_SUCCESS(ini.add_section("section2", "comment"));
+	TEST_RETURNS(ini.get_comment("section2"), "; comment\n");
+
 	if (argc > 1) {
 		ini = IniFile::load(argv[1]);
 		string writer(ini.get("core.writer"));

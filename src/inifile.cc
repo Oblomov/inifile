@@ -137,6 +137,10 @@ string const&
 IniFile::get_comment(string const& ks) const
 { return _private->get_comment(ks); }
 
+void
+IniFile::add_section(string const& name, string const& comment)
+{ _private->add_section(name, comment); }
+
 ostream&
 operator<<(ostream& out, IniFile const& ini)
 {

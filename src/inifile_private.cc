@@ -92,9 +92,11 @@ IniFile::Private::parse(istream &stream, const char *fname)
 				section += rest;
 			}
 
-			_seclist.push_back(section);
-			_keylist[section] = _svec();
-			_comments[section] = comment;
+			// TODO we might want to merge split sections together
+			if (has_section(section))
+				ERR("duplicate section: " + section);
+
+			SAFE_add_section(section, comment);
 
 			comment.clear();
 
@@ -184,6 +186,38 @@ IniFile::Private::get_comment(string const& ks) const
 		throw notfound_error(ks);
 
 	return found->second;
+}
+
+void
+IniFile::Private::SAFE_add_section(string const& secname, string const& comment)
+{
+	_seclist.push_back(secname);
+	_keylist[secname] = _svec();
+	_comments[secname] = comment;
+}
+
+void
+IniFile::Private::add_section(string const& secname, string const& _comment)
+{
+	if (has_section(secname))
+		throw duplicate_error("section", secname);
+
+	// TODO we might want to support whitespace in section names in the future
+	if (secname.find_first_of(whitespace) != string::npos)
+		throw invalid_argument("whitespace in section name");
+
+	// now check that every comment line begins with a comment character
+	// and add a terminating newline if necessary
+	string comment, line;
+	stringstream c(_comment);
+	while (getline(c, line)) {
+		// add comment sign if necessary
+		if (!(line.empty() || line[0] == '#' || line[0] == ';'))
+			comment += "; ";
+		comment += line + "\n";
+	}
+
+	SAFE_add_section(secname, comment);
 }
 
 /*

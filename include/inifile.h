@@ -17,11 +17,15 @@ private:
 	Private *_private;
 
 public:
+	/* Constructors/destructors */
+
 	IniFile();
 	~IniFile();
 
 	IniFile(IniFile const&);
 	IniFile& operator=(IniFile const&);
+
+	/* Static parsers/loaders */
 
 	// parse an input stream, optionally associate
 	// a filename to it (to improve error messages)
@@ -43,6 +47,8 @@ public:
 	static inline IniFile
 	load(std::string const& fname)
 	{ return load(fname.c_str()); }
+
+	/* Read-only accessors */
 
 	// if key not found, return missing
 	template<typename T> T
@@ -70,6 +76,14 @@ public:
 	// get comment for section or key
 	std::string const&
 	get_comment(std::string const&) const;
+
+	/* Write-only accessors */
+
+	// add a section with an optional comment. throws if section
+	// exists, sanitizes comment
+	void add_section(std::string const& name, std::string const& comment="");
+
+	/* Streaming functions */
 
 	friend std::ostream& operator<<(std::ostream&, IniFile const&);
 	friend std::istream& operator>>(std::istream&, IniFile &);
