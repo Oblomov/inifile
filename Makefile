@@ -6,7 +6,7 @@ ERRNAME=inierr
 
 CPPFLAGS=-g -Wall -I$(INCDIR)
 
-OBJS=$(addprefix $(OBJDIR)/, $(LIBNAME).o $(ERRNAME).o)
+OBJS=$(addprefix $(OBJDIR)/, $(LIBNAME).o $(LIBNAME)_private.o $(ERRNAME).o)
 
 OUTLIB=lib$(LIBNAME).a
 SAMPLE=sample
@@ -14,7 +14,7 @@ SAMPLE=sample
 all: $(OUTLIB)
 
 vpath %.cc $(SRCDIR) test/
-vpath %.h $(INCDIR)
+vpath %.h $(INCDIR) $(SRCDIR)
 
 $(OBJDIR):
 	mkdir -p $@
@@ -24,6 +24,8 @@ $(OBJDIR)/%.o: %.cc %.h
 
 # they all depend from inierr.h
 $(OBJS): $(ERRNAME).h | $(OBJDIR)
+
+$(OBJDIR)/$(LIBNAME).o: $(LIBNAME)_private.h
 
 $(OUTLIB): $(OBJS)
 	$(AR) cr $@ $^
