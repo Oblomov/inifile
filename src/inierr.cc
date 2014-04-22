@@ -18,5 +18,10 @@ parse_error::parse_error(const char* src, int lnum, const string& __arg) :
 {}
 
 notfound_error::notfound_error(const string& __arg) :
-	runtime_error(__arg)
+	invalid_argument(__arg)
 {}
+
+duplicate_error::duplicate_error(const string& __type, const string& __arg) :
+	invalid_argument("duplicate " + __type + ": " + __arg)
+{}
+
