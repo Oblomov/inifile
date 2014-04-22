@@ -83,6 +83,48 @@ public:
 	// exists, sanitizes comment
 	void add_section(std::string const& name, std::string const& comment="");
 
+	// add a key in a given section. throws if section doesn't exist
+	void set(std::string const& section, std::string const& key,
+		std::string const& value);
+
+	template<typename T> inline void
+	set(std::string const& section, std::string const& key, T _v)
+	{
+		std::stringstream value; value << _v;
+		this->set(section, key, value.str());
+	}
+
+	// add a key in a given section, creates section if necessary
+	void set_p(std::string const& section, std::string const& key,
+		std::string const& value);
+
+	template<typename T> inline void
+	set_p(std::string const& section, std::string const& key, T _v)
+	{
+		std::stringstream value; value << _v;
+		this->set_p(section, key, value.str());
+	}
+
+	// add a key (dotted notation). throws if section doesn't exist
+	void set(std::string const& dotted, std::string const& value);
+
+	template<typename T> inline void
+	set(std::string const& dotted, T _v)
+	{
+		std::stringstream value; value << _v;
+		this->set(dotted, value.str());
+	}
+
+	// add a key (dotted notation), creates section if necessary
+	void set_p(std::string const& dotted, std::string const& value);
+
+	template<typename T> inline void
+	set_p(std::string const& dotted, T _v)
+	{
+		std::stringstream value; value << _v;
+		this->set_p(dotted, value.str());
+	}
+
 	/* Streaming functions */
 
 	friend std::ostream& operator<<(std::ostream&, IniFile const&);

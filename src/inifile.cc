@@ -97,7 +97,7 @@ IniFile::get<bool>(string const& key) const
 }
 
 template<typename T> T
-IniFile::get(std::string const& key) const
+IniFile::get(string const& key) const
 {
 	T val;
 
@@ -140,6 +140,48 @@ IniFile::get_comment(string const& ks) const
 void
 IniFile::add_section(string const& name, string const& comment)
 { _private->add_section(name, comment); }
+
+/* Value setters */
+
+void
+IniFile::set(string const& section, string const& key,
+	string const& value)
+{
+	_private->set(section, key, value, false);
+}
+
+void
+IniFile::set_p(string const& section, string const& key,
+	string const& value)
+{
+	_private->set(section, key, value, true);
+}
+
+void
+IniFile::set(string const& dotted, string const& value)
+{
+	size_t lastdot = dotted.rfind('.');
+	if (lastdot == string::npos)
+		throw parse_error("<key.value>", 0, "missing dot");
+
+	_private->set(dotted.substr(0, lastdot),
+		dotted.substr(lastdot+1, string::npos),
+		value, false);
+}
+
+void
+IniFile::set_p(string const& dotted, string const& value)
+{
+	size_t lastdot = dotted.rfind('.');
+	if (lastdot == string::npos)
+		throw parse_error("<key.value>", 0, "missing dot");
+
+	_private->set(dotted.substr(0, lastdot),
+		dotted.substr(lastdot+1, string::npos),
+		value, true);
+}
+
+/* Streaming functions */
 
 ostream&
 operator<<(ostream& out, IniFile const& ini)

@@ -220,6 +220,34 @@ IniFile::Private::add_section(string const& secname, string const& _comment)
 	SAFE_add_section(secname, comment);
 }
 
+void
+IniFile::Private::set(string const& sec, string const& skey, string const& value,
+		bool create_missing)
+{
+	// first of all, check if sec exists
+	if (!has_section(sec)) {
+		if (create_missing)
+			add_section(sec, "");
+		else
+			throw notfound_error(sec);
+	}
+
+	// full key
+	string key = dotjoin(sec, skey);
+
+	// does the key exist yet?
+	_ssmap::const_iterator found(_data.find(key));
+
+	// no, create it
+	if (found == _data.end()) {
+		_keylist[sec].push_back(skey);
+		_comments[key] = "";
+	}
+
+	// (over)write the value
+	_data[key] = value;
+}
+
 /*
  * Streaming of a IniFile::Private
  */

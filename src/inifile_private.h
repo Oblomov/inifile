@@ -47,6 +47,12 @@ public:
 	// add a section with an (optional) comment. throws if section
 	// exists, sanitizes comment
 	void add_section(string const& name, string const& comment);
+
+	// set a key value under the given section. If the section sec does not
+	// exist, an error will be thrown, unless create_missing is true, in which
+	// case a new section will be created
+	void set(string const& sec, string const& key, string const& value,
+		bool create_missing);
 };
 
 ostream& operator<<(ostream& out, IniFile::Private const& ip);
