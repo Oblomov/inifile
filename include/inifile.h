@@ -8,7 +8,9 @@
 #include <map>
 #include <vector>
 
-class IniFile
+#include "inifile_api.h"
+
+class INIFILE_API IniFile
 {
 public:
 	class Private;

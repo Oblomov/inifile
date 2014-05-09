@@ -4,14 +4,30 @@ OBJDIR=build
 LIBNAME=inifile
 ERRNAME=inierr
 
-CPPFLAGS=-g -Wall -I$(INCDIR)
-
 OBJS=$(addprefix $(OBJDIR)/, $(LIBNAME).o $(LIBNAME)_private.o $(ERRNAME).o)
 
-OUTLIB=lib$(LIBNAME).a
+VERSION_MAJOR=1
+VERSION_MINOR=0
+VERSION=$(VERSION_MAJOR).$(VERSION_MINOR)
+
+ALIB=lib$(LIBNAME).a
+
+SOBASENAME=lib$(LIBNAME).so
+SOLIBNAME=lib$(LIBNAME).so.$(VERSION_MAJOR)
+SOLIB=$(SOBASENAME).$(VERSION)
+
+SOFILES=$(SOLIB) $(SOLIBNAME) $(SOBASENAME)
+
+CPPFLAGS=-g -Wall -I$(INCDIR)
+CXXFLAGS=-fPIC
+
 SAMPLE=sample
 
-all: $(OUTLIB)
+all: libs
+	
+solib: $(SOLIB) $(SOLIBAME) $(SOBASENAME)
+
+libs: $(ALIB) solib
 
 vpath %.cc $(SRCDIR) test/
 vpath %.h $(INCDIR) $(SRCDIR)
@@ -27,16 +43,26 @@ $(OBJS): $(ERRNAME).h | $(OBJDIR)
 
 $(OBJDIR)/$(LIBNAME).o: $(LIBNAME)_private.h
 
-$(OUTLIB): $(OBJS)
+$(ALIB): $(OBJS)
 	$(AR) cr $@ $^
 
-$(SAMPLE): LDLIBS=-L. -lstdc++ -l$(LIBNAME)
-$(SAMPLE): $(OUTLIB)
+$(SOLIB): LDFLAGS=-shared -Wl,-soname=$(SOLIBNAME) -Wl,-E
+$(SOLIB): $(OBJS)
+	$(CXX) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+$(SOLIBNAME): $(SOLIB)
+	ln -sf $< $@
+
+$(SOBASENAME): $(SOLIBNAME)
+	ln -sf $< $@
+
+$(SAMPLE): LDLIBS=-L. -l$(LIBNAME) -lstdc++
 
 test: $(SAMPLE)
-	./$(SAMPLE) test/sample.ini
+	LD_LIBRARY_PATH=$${LDLIBRARY_PATH}:. ./$(SAMPLE) test/sample.ini
 
 clean:
-	-rm -rf $(OBJDIR) $(OUTLIB) $(SAMPLE)
+	-rm -rf $(OBJDIR) $(ALIB) $(SOFILES) $(SAMPLE)
 
-.PHONY: all clean test
+.PHONY: all libs solib
+.PHONY: clean test
