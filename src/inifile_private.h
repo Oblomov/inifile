@@ -1,5 +1,5 @@
 #ifndef _INIFILE_PRIVATE_H
-#define _INIFILE_PRIVATE
+#define _INIFILE_PRIVATE_H
 
 #include "inifile.h"
 
