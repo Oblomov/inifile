@@ -1,15 +1,20 @@
+MKCOM=Makefile.common
+MKLIB=Makefile.lib
+MKTST=Makefile.test
+
+
 all: libs test
 
-libs:
-	$(MAKE) -f Makefile.lib libs
+libs: $(MKLIB)
+	$(MAKE) -f $< $@
 
-test: libs
-	$(MAKE) -f Makefile.test test
+test: $(MKTST) libs
+	$(MAKE) -f $< $@
 
-clean:
-	$(MAKE) -f Makefile.common common-clean
-	$(MAKE) -f Makefile.lib clean
-	$(MAKE) -f Makefile.test clean
+clean: $(MKCOM) $(MKLIB) $(MKTST)
+	$(MAKE) -f $(MKCOM) common-$@
+	$(MAKE) -f $(MKLIB) $@
+	$(MAKE) -f $(MKTST) $@
 
 .PHONY: all lib test
 .PHONY: clean
