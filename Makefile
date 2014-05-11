@@ -19,7 +19,7 @@ SOLIB=$(SOBASENAME).$(VERSION)
 SOFILES=$(SOLIB) $(SOLIBNAME) $(SOBASENAME)
 
 CPPFLAGS=-g -Wall -I$(INCDIR)
-CXXFLAGS=-fPIC
+CXXFLAGS=-fPIC -fvisibility=hidden
 
 SAMPLE=sample
 
@@ -46,7 +46,7 @@ $(OBJDIR)/$(LIBNAME).o: $(LIBNAME)_private.h
 $(ALIB): $(OBJS)
 	$(AR) cr $@ $^
 
-$(SOLIB): LDFLAGS=-shared -Wl,-soname=$(SOLIBNAME) -Wl,-E
+$(SOLIB): LDFLAGS=-shared -Wl,-soname=$(SOLIBNAME)
 $(SOLIB): $(OBJS)
 	$(CXX) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 

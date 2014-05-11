@@ -129,8 +129,8 @@ public:
 
 	/* Streaming functions */
 
-	friend std::ostream& operator<<(std::ostream&, IniFile const&);
-	friend std::istream& operator>>(std::istream&, IniFile &);
+	friend INIFILE_API std::ostream& operator<<(std::ostream&, IniFile const&);
+	friend INIFILE_API std::istream& operator>>(std::istream&, IniFile &);
 };
 
 /// dotjoin: joins two or three strings with dots
