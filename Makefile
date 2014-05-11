@@ -16,5 +16,5 @@ clean: $(MKCOM) $(MKLIB) $(MKTST)
 	$(MAKE) -f $(MKLIB) $@
 	$(MAKE) -f $(MKTST) $@
 
-.PHONY: all lib test
+.PHONY: all libs test
 .PHONY: clean
