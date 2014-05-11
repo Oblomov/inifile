@@ -56,7 +56,7 @@ $(SOLIBNAME): $(SOLIB)
 $(SOBASENAME): $(SOLIBNAME)
 	ln -sf $< $@
 
-$(SAMPLE): LDLIBS=-L. -l$(LIBNAME) -lstdc++
+$(SAMPLE): LDLIBS=-L. -l$(LIBNAME)
 
 test: $(SAMPLE)
 	LD_LIBRARY_PATH=$${LDLIBRARY_PATH}:. ./$(SAMPLE) test/sample.ini
