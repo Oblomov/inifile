@@ -1,0 +1,27 @@
+# vim: ft=make
+
+INCDIR=include
+OBJDIR=build
+LIBNAME=inifile
+ERRNAME=$(LIBNAME)_err
+
+VERSION_MAJOR=1
+VERSION_MINOR=0
+VERSION=$(VERSION_MAJOR).$(VERSION_MINOR)
+
+CPPFLAGS=-g -Wall -I$(INCDIR)
+
+vpath %.cc $(SRCDIR)
+vpath %.h $(INCDIR)
+
+$(OBJDIR):
+	mkdir -p $@
+
+$(OBJDIR)/%.o: %.cc %.h | $(OBJDIR)
+	$(COMPILE.cc) $(OUTPUT_OPTION) $<
+
+# they all depend on $(ERRNAME).h
+$(OBJS): $(ERRNAME).h
+
+common-clean:
+	-rm -rf $(OBJDIR)

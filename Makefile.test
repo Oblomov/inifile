@@ -1,0 +1,23 @@
+#vim: ft=make
+
+SRCDIR=test
+
+include Makefile.common
+
+SAMPLE=sample
+
+OBJS=$(addprefix $(OBJDIR)/, $(SAMPLE).o)
+
+vpath %.cc $(SRCDIR)
+
+LDFLAGS=-L.
+LDLIBS=-l$(LIBNAME)
+
+test: $(SAMPLE)
+	LD_LIBRARY_PATH=$${LDLIBRARY_PATH}:. ./$(SAMPLE) test/sample.ini
+
+$(SAMPLE):
+
+clean:
+	-rm -rf $(SAMPLE)
+

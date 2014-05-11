@@ -1,0 +1,44 @@
+# vim: ft=make
+
+SRCDIR=src
+
+include Makefile.common
+
+OBJS=$(addprefix $(OBJDIR)/, $(LIBNAME).o $(LIBNAME)_private.o $(ERRNAME).o)
+
+ALIB=lib$(LIBNAME).a
+
+SOBASENAME=lib$(LIBNAME).so
+SOLIBNAME=lib$(LIBNAME).so.$(VERSION_MAJOR)
+SOLIB=$(SOBASENAME).$(VERSION)
+
+SOFILES=$(SOLIB) $(SOLIBNAME) $(SOBASENAME)
+
+vpath %.h $(SRCDIR)
+
+CXXFLAGS=-fPIC -fvisibility=hidden
+LDFLAGS=-shared -Wl,-soname=$(SOLIBNAME)
+
+libs: $(ALIB) solib
+
+solib: $(SOLIB) $(SOLIBAME) $(SOBASENAME)
+
+$(ALIB): $(OBJS)
+	$(AR) cr $@ $^
+
+$(OBJDIR)/$(LIBNAME).o: $(LIBNAME)_private.h
+
+$(SOLIB): $(OBJS)
+	$(CXX) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+$(SOLIBNAME): $(SOLIB)
+	ln -sf $< $@
+
+$(SOBASENAME): $(SOLIBNAME)
+	ln -sf $< $@
+
+clean:
+	-rm -rf $(ALIB) $(SOFILES)
+
+.PHONY: libs solib
+
