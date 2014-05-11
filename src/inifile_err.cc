@@ -1,4 +1,4 @@
-#include "inierr.h"
+#include "inifile_err.h"
 
 #include <sstream>
 

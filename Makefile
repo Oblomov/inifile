@@ -2,7 +2,7 @@ SRCDIR=src
 INCDIR=include
 OBJDIR=build
 LIBNAME=inifile
-ERRNAME=inierr
+ERRNAME=$(LIBNAME)_err
 
 OBJS=$(addprefix $(OBJDIR)/, $(LIBNAME).o $(LIBNAME)_private.o $(ERRNAME).o)
 
@@ -38,7 +38,7 @@ $(OBJDIR):
 $(OBJDIR)/%.o: %.cc %.h
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
-# they all depend from inierr.h
+# they all depend from $(ERRNAME).h
 $(OBJS): $(ERRNAME).h | $(OBJDIR)
 
 $(OBJDIR)/$(LIBNAME).o: $(LIBNAME)_private.h
