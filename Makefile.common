@@ -2,6 +2,7 @@
 
 INCDIR=include
 OBJDIR=build
+LIBDIR=lib
 LIBNAME=inifile
 ERRNAME=$(LIBNAME)_err
 
@@ -16,6 +17,10 @@ vpath %.h $(INCDIR)
 
 $(OBJDIR):
 	mkdir -p $@
+
+$(LIBDIR):
+	mkdir -p $@
+
 
 $(OBJDIR)/%.o: %.cc %.h | $(OBJDIR)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<

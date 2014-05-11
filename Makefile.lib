@@ -6,13 +6,13 @@ include Makefile.common
 
 OBJS=$(addprefix $(OBJDIR)/, $(LIBNAME).o $(LIBNAME)_private.o $(ERRNAME).o)
 
-ALIB=lib$(LIBNAME).a
+ALIB=$(LIBDIR)/lib$(LIBNAME).a
 
 SOBASENAME=lib$(LIBNAME).so
 SOLIBNAME=lib$(LIBNAME).so.$(VERSION_MAJOR)
 SOLIB=$(SOBASENAME).$(VERSION)
 
-SOFILES=$(SOLIB) $(SOLIBNAME) $(SOBASENAME)
+SOFILES=$(addprefix $(LIBDIR)/, $(SOLIB) $(SOLIBNAME) $(SOBASENAME))
 
 vpath %.h $(SRCDIR)
 
@@ -21,24 +21,24 @@ LDFLAGS=-shared -Wl,-soname=$(SOLIBNAME)
 
 libs: $(ALIB) solib
 
-solib: $(SOLIB) $(SOLIBAME) $(SOBASENAME)
+solib: $(SOFILES)
 
-$(ALIB): $(OBJS)
+$(ALIB): $(OBJS) | $(LIBDIR)
 	$(AR) cr $@ $^
 
 $(OBJDIR)/$(LIBNAME).o: $(LIBNAME)_private.h
 
-$(SOLIB): $(OBJS)
+$(LIBDIR)/$(SOLIB): $(OBJS) | $(LIBDIR)
 	$(CXX) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
-$(SOLIBNAME): $(SOLIB)
-	ln -sf $< $@
+$(LIBDIR)/$(SOLIBNAME): $(LIBDIR)/$(SOLIB)
+	ln -sf $(<F) $@
 
-$(SOBASENAME): $(SOLIBNAME)
-	ln -sf $< $@
+$(LIBDIR)/$(SOBASENAME): $(LIBDIR)/$(SOLIBNAME)
+	ln -sf $(<F) $@
 
 clean:
-	-rm -rf $(ALIB) $(SOFILES)
+	-rm -rf $(LIBDIR)
 
 .PHONY: libs solib
 

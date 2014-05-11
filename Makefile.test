@@ -10,11 +10,11 @@ OBJS=$(addprefix $(OBJDIR)/, $(SAMPLE).o)
 
 vpath %.cc $(SRCDIR)
 
-LDFLAGS=-L.
+LDFLAGS=-L$(LIBDIR)
 LDLIBS=-l$(LIBNAME)
 
 test: $(SAMPLE)
-	LD_LIBRARY_PATH=$${LDLIBRARY_PATH}:. ./$(SAMPLE) test/sample.ini
+	LD_LIBRARY_PATH=$${LDLIBRARY_PATH}:$(LIBDIR) ./$(SAMPLE) test/sample.ini
 
 $(SAMPLE):
 
