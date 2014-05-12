@@ -21,3 +21,5 @@ $(SAMPLE):
 clean:
 	-rm -rf $(SAMPLE)
 
+
+.PHONY: test

@@ -56,15 +56,18 @@ int main(int argc, char *argv[])
 #define TEST_VALUE_FAIL(key) \
 	EXPECT_FAILURE(ini.get(key), notfound_error)
 
-#define TEST_RETURNS(action, expected) \
+#define TEST_RETURNS_T(type, action, expected) \
 	EXPECT_SUCCESS( \
-		string got = action; \
+		type got = action; \
 		if (got != expected) { \
 			stringstream error; \
-			error << "expected " << expected ", got " << got; \
+			error << "expected " << expected << ", got " << got; \
 			throw runtime_error(error.str()); \
 		} \
 		)
+
+
+#define TEST_RETURNS(action, expected) TEST_RETURNS_T(string, action, expected)
 
 #define TEST_VALUE_IS(key, expected) \
 	TEST_RETURNS(ini.get(key), expected)
@@ -102,8 +105,10 @@ int main(int argc, char *argv[])
 
 		bool norms = ini.get<bool>(dotjoin("writer", writer, "normals"));
 		bool engy = ini.get<bool>(dotjoin("writer", writer, "energy"));
-		cout << norms << " " << engy << endl;
-		cout << ini.get<double>("problem.slope") << endl;
+
+		TEST_RETURNS_T(bool, norms, true);
+		TEST_RETURNS_T(bool, engy, false);
+		TEST_RETURNS_T(double, ini.get<double>("problem.slope"), 20);
 
 		cout << ini << endl;
 	}
