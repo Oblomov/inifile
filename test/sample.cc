@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 {
 	IniFile ini;
 	int test = 0;
+	int success = 0;
 
 #define EXPECT_FAILURE(testcode, type) do { \
 	try { \
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
 		throw; \
 	} catch (type &e) { \
 		cerr << "[OK] (l." << __LINE__ << ") #" << test << ": " << #type << ": " << e.what() << endl; \
+		++success; \
 	} catch (...) { \
 		cerr << "[FAIL] (l." << __LINE__ << ") #" << test << endl; \
 	} } while (0)
@@ -29,6 +31,7 @@ int main(int argc, char *argv[])
 		++test; \
 		testcode; \
 		cerr << "[OK] (l." << __LINE__ << ") #" << test << endl; \
+		++success; \
 	} catch (runtime_error &e) { \
 		cerr << "[FAIL] (l." << __LINE__ << ") #" << test << ": " << e.what() << endl; \
 	} catch (...) { \
@@ -104,4 +107,8 @@ int main(int argc, char *argv[])
 
 		cout << ini << endl;
 	}
+
+	int ret = test - success;
+	cout << success << "/" << test << " tests passed, " << ret << " failures" << endl;
+	return test - success;
 }
